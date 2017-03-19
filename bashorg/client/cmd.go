@@ -12,7 +12,7 @@ func main() {
 		fmt.Printf("%s\n", err)
 		return
 	}
-	for _, quote := range resp {
+	for _, quote := range bashorg.SortByVotes(resp) {
 		fmt.Printf("%s\n", quote)
 	}
 }

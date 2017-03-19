@@ -3,6 +3,9 @@ package bashorg
 import (
 	"fmt"
 	"net/http"
+	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/go-xmlpath/xmlpath"
 )
@@ -25,13 +28,30 @@ type bashOrg struct {
 }
 
 type quote struct {
-	id    string
-	votes string
+	id    int
+	votes int
 	text  string
 }
 
+type quotes []quote
+
+func (q quotes) Len() int           { return len(q) }
+func (q quotes) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
+func (q quotes) Less(i, j int) bool { return q[i].id < q[j].id }
+
+type quotesByVote quotes
+
+func (q quotesByVote) Len() int           { return len(q) }
+func (q quotesByVote) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
+func (q quotesByVote) Less(i, j int) bool { return q[i].votes < q[j].votes }
+
 func (q quote) String() string {
-	return fmt.Sprintf("Id: %s -- Votes: %s\n----------\n%s\n", q.id, q.votes, q.text)
+	return fmt.Sprintf("Id: %d -- Votes: %d\n----------\n%s\n", q.id, q.votes, q.text)
+}
+
+func SortByVotes(qs quotes) quotes {
+	sort.Sort(quotesByVote(qs))
+	return quotes(qs)
 }
 
 func NewBashOrg() bashOrg {
@@ -39,7 +59,7 @@ func NewBashOrg() bashOrg {
 }
 
 func (b *bashOrg) GetRandom() ([]quote, error) {
-	qRet := make([]quote, 0)
+	qRet := make(quotes, 0)
 	resp, err := b.Get(bashRandomOne)
 	if err != nil {
 		return qRet, err
@@ -51,25 +71,39 @@ func (b *bashOrg) GetRandom() ([]quote, error) {
 		return qRet, err
 	}
 
-	quotes := quotePath.Iter(root)
-	for quotes.Next() {
-		qt := quotes.Node()
+	qs := quotePath.Iter(root)
+	for qs.Next() {
+		qt := qs.Node()
 		md := mdPath.Iter(qt)
 		if !md.Next() {
 			break
 		}
 
-		id, ok := idPath.String(md.Node())
+		idStr, ok := idPath.String(md.Node())
 		if !ok {
 			break
+		}
+		id, err := strconv.Atoi(strings.Trim(idStr, "#"))
+		if err != nil {
+			return qRet, err
 		}
 
-		votes, ok := votePath.String(md.Node())
+		votesStr, ok := votePath.String(md.Node())
 		if !ok {
 			break
 		}
-		q := quote{id: id, votes: votes, text: qt.String()}
+		votes, err := strconv.Atoi(strings.Trim(votesStr, "#"))
+		if err != nil {
+			return qRet, err
+		}
+
+		q := quote{
+			id:    id,
+			votes: votes,
+			text:  qt.String(),
+		}
 		qRet = append(qRet, q)
 	}
+	sort.Sort(qRet)
 	return qRet, nil
 }
