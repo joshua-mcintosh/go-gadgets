@@ -12,14 +12,14 @@ import (
 
 const (
 	bashRandomOne = "http://bash.org/?random1"
-	quoteSelector = "/html/body/center[1]/table/tbody/tr/td[1]/p[@class=\"qt\"]"
-	mdSelector    = "preceding::p[@class=\"quote\"]"
+	quoteSelector = `/html/body/center[1]/table/tbody/tr/td[1]/p[@class="qt"]`
+	mdSelector    = `preceding::p[@class="quote"]`
 )
 
 var (
 	quotePath = xmlpath.MustCompile(quoteSelector)
 	mdPath    = xmlpath.MustCompile(mdSelector)
-	idPath    = xmlpath.MustCompile("a[@title=\"Permanent link to this quote.\"]")
+	idPath    = xmlpath.MustCompile(`a[@title="Permanent link to this quote."]`)
 	votePath  = xmlpath.MustCompile("font[1]")
 )
 
@@ -39,19 +39,14 @@ func (q quotes) Len() int           { return len(q) }
 func (q quotes) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
 func (q quotes) Less(i, j int) bool { return q[i].id < q[j].id }
 
-type quotesByVote quotes
+type QuotesByVote quotes
 
-func (q quotesByVote) Len() int           { return len(q) }
-func (q quotesByVote) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
-func (q quotesByVote) Less(i, j int) bool { return q[i].votes < q[j].votes }
+func (q QuotesByVote) Len() int           { return len(q) }
+func (q QuotesByVote) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
+func (q QuotesByVote) Less(i, j int) bool { return q[i].votes < q[j].votes }
 
 func (q quote) String() string {
 	return fmt.Sprintf("Id: %d -- Votes: %d\n----------\n%s\n", q.id, q.votes, q.text)
-}
-
-func SortByVotes(qs quotes) quotes {
-	sort.Sort(quotesByVote(qs))
-	return quotes(qs)
 }
 
 func NewBashOrg() bashOrg {
