@@ -1,34 +1,33 @@
 package bashorg
 
 import (
-"fmt"
-"net/http"
+	"fmt"
+	"net/http"
 
-"github.com/go-xmlpath/xmlpath"
+	"github.com/go-xmlpath/xmlpath"
 )
 
-const(
+const (
 	bashRandomOne = "http://bash.org/?random1"
 	quoteSelector = "/html/body/center[1]/table/tbody/tr/td[1]/p[@class=\"qt\"]"
-	mdSelector = "preceding::p[@class=\"quote\"]"
+	mdSelector    = "preceding::p[@class=\"quote\"]"
 )
 
-var(
+var (
 	quotePath = xmlpath.MustCompile(quoteSelector)
-	mdPath = xmlpath.MustCompile(mdSelector)
-	idPath = xmlpath.MustCompile("a[@title=\"Permanent link to this quote.\"]")
-	votePath = xmlpath.MustCompile("font[1]")
-	
+	mdPath    = xmlpath.MustCompile(mdSelector)
+	idPath    = xmlpath.MustCompile("a[@title=\"Permanent link to this quote.\"]")
+	votePath  = xmlpath.MustCompile("font[1]")
 )
 
-type bashOrg struct{
+type bashOrg struct {
 	http.Client
 }
 
-type quote struct{
-	id string
+type quote struct {
+	id    string
 	votes string
-	text string
+	text  string
 }
 
 func (q quote) String() string {
@@ -69,7 +68,7 @@ func (b *bashOrg) GetRandom() ([]quote, error) {
 		if !ok {
 			break
 		}
-		q:= quote{id: id, votes:votes, text:qt.String()}
+		q := quote{id: id, votes: votes, text: qt.String()}
 		qRet = append(qRet, q)
 	}
 	return qRet, nil
