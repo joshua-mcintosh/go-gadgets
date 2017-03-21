@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"sort"
 
 	bo "github.com/joshua-mcintosh/go-gadgets/bashorg"
 )
@@ -22,7 +21,7 @@ func main() {
 		return
 	}
 	if *sortByVotes {
-		sort.Slice(quotes, func(i, j int) bool { return quotes[i].Votes < quotes[j].Votes })
+		quotes.SortByVote()
 	}
 	for _, quote := range quotes {
 		fmt.Printf("%s\n", quote)

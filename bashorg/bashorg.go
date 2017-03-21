@@ -38,16 +38,18 @@ type quotes []quote
 func (q quotes) Len() int           { return len(q) }
 func (q quotes) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
 func (q quotes) Less(i, j int) bool { return q[i].Id < q[j].Id }
+func (q quotes) SortByVote() { sort.Slice(q, func(i, j int) bool { return q[i].Votes < q[j].Votes }) }
 
 func (q quote) String() string {
 	return fmt.Sprintf("Id: %d -- Votes: %d\n----------\n%s\n", q.Id, q.Votes, q.Text)
 }
 
+
 func NewBashOrg() bashOrg {
 	return bashOrg{}
 }
 
-func (b *bashOrg) GetRandom() ([]quote, error) {
+func (b *bashOrg) GetRandom() (quotes, error) {
 	qRet := make(quotes, 0)
 	resp, err := b.Get(bashRandomOne)
 	if err != nil {
@@ -55,12 +57,12 @@ func (b *bashOrg) GetRandom() ([]quote, error) {
 	}
 	defer resp.Body.Close()
 
-	root, err := xmlpath.ParseHTML(resp.Body)
+	xml, err := xmlpath.ParseHTML(resp.Body)
 	if err != nil {
 		return qRet, err
 	}
 
-	qs := quotePath.Iter(root)
+	qs := quotePath.Iter(xml)
 	for qs.Next() {
 		qt := qs.Node()
 		md := mdPath.Iter(qt)
