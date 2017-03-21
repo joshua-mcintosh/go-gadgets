@@ -28,25 +28,19 @@ type bashOrg struct {
 }
 
 type quote struct {
-	id    int
-	votes int
-	text  string
+	Id    int
+	Votes int
+	Text  string
 }
 
 type quotes []quote
 
 func (q quotes) Len() int           { return len(q) }
 func (q quotes) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
-func (q quotes) Less(i, j int) bool { return q[i].id < q[j].id }
-
-type QuotesByVote quotes
-
-func (q QuotesByVote) Len() int           { return len(q) }
-func (q QuotesByVote) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
-func (q QuotesByVote) Less(i, j int) bool { return q[i].votes < q[j].votes }
+func (q quotes) Less(i, j int) bool { return q[i].Id < q[j].Id }
 
 func (q quote) String() string {
-	return fmt.Sprintf("Id: %d -- Votes: %d\n----------\n%s\n", q.id, q.votes, q.text)
+	return fmt.Sprintf("Id: %d -- Votes: %d\n----------\n%s\n", q.Id, q.Votes, q.Text)
 }
 
 func NewBashOrg() bashOrg {
@@ -93,9 +87,9 @@ func (b *bashOrg) GetRandom() ([]quote, error) {
 		}
 
 		q := quote{
-			id:    id,
-			votes: votes,
-			text:  qt.String(),
+			Id:    id,
+			Votes: votes,
+			Text:  qt.String(),
 		}
 		qRet = append(qRet, q)
 	}
